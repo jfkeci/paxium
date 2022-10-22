@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model users {
+  id        Int         @id @unique(map: "id_UNIQUE") @default(autoincrement()) @db.UnsignedInt
+  firstName String?     @db.VarChar(45)
+  lastName  String?     @db.VarChar(45)
+  birthdate String?     @db.VarChar(45)
+  createdAt DateTime?   @default(now()) @db.DateTime(0)
+  updatedAt DateTime?   @default(now()) @db.DateTime(0)
+  email     String      @db.VarChar(45)
+  password  String      @db.VarChar(45)
+  username  String      @db.VarChar(45)
+  logs      logs[]
+  questions questions[]
+}
+
+model groups {
+  id        Int      @id @unique(map: "id_UNIQUE") @default(autoincrement()) @db.UnsignedInt
+  name      String?  @db.VarChar(45)
+  createdAt DateTime @default(now()) @db.DateTime(0)
+  updatedAt DateTime @default(now()) @db.DateTime(0)
+}
+
+model logs {
+  id        Int       @id @unique(map: "id_UNIQUE") @default(autoincrement()) @db.UnsignedInt
+  text      String    @db.VarChar(45)
+  groups    Json
+  user      Int       @db.UnsignedInt
+  createdAt DateTime  @default(now()) @db.DateTime(0)
+  updatedAt DateTime  @default(now()) @db.DateTime(0)
+  question  Int       @db.UnsignedInt
+  questions questions @relation(fields: [question], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "log_question")
+  users     users     @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "user_log")
+
+  @@index([question], map: "log_question_idx")
+  @@index([user], map: "user_log_idx")
+}
+
+model questions {
+  id        Int       @id @unique(map: "id_UNIQUE") @default(autoincrement()) @db.UnsignedInt
+  user      Int       @db.UnsignedInt
+  text      String?   @db.VarChar(125)
+  createdAt DateTime? @default(now()) @db.DateTime(0)
+  updatedAt DateTime? @default(now()) @db.DateTime(0)
+  users     users     @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "question_user")
+  logs      logs[]
+
+  @@index([user], map: "question_user_idx")
+}

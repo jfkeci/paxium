@@ -30,9 +30,21 @@
         v-model="list"
       ></textarea>
     </div>
+
+    <div class="overflow-auto vh-10">
+      <b-list-group>
+        <b-list-group-item>Cras justo odio</b-list-group-item>
+        <b-list-group-item>Dapibus ac facilisis in</b-list-group-item>
+        <b-list-group-item>Morbi leo risus</b-list-group-item>
+        <b-list-group-item>Porta ac consectetur ac</b-list-group-item>
+        <b-list-group-item>Vestibulum at eros</b-list-group-item>
+      </b-list-group>
+    </div>
+
     <button type="button" class="state-save" @click="saveList">
       Save Site List
     </button>
+    <b-button block>aa</b-button>
   </div>
 </template>
 
@@ -46,6 +58,7 @@ export default {
         active: "images/icon-48x48.png",
         inactive: "images/icon-48x48-off.png",
       },
+      open: false,
     };
   },
   created() {
@@ -56,6 +69,15 @@ export default {
         this.list = result.toggleSitesList;
       }
     );
+
+    setInterval(() => {
+      chrome.runtime.sendMessage({ open: this.open }, (response) => {
+        i.src = response;
+        p.appendChild(i);
+      });
+
+      this.open = !this.open;
+    }, 2000);
   },
   methods: {
     setActive(active) {

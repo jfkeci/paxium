@@ -53,3 +53,32 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
     }
   }
 });
+
+// https://gist.github.com/piayo/4274463
+let _timer = null;
+let _flg_opened = false;
+let _func_toggle = function(flg) {
+  _flg_opened = flg;
+  clearTimeout(_timer);
+  _timer = setTimeout(function() {
+    console.log(">>_flg_opened: " + _flg_opened);
+    if (_flg_opened) {
+      chrome.browserAction.setPopup({ popup: "" });
+      chrome.browserAction.setBadgeText({ text: "OFF" });
+      chrome.browserAction.setTitle({ title: "NextClick: Close" });
+      clearTimeout(_timer);
+    } else {
+      chrome.browserAction.setPopup({ popup: "popup.html" });
+      chrome.browserAction.setBadgeText({ text: "ON" });
+      chrome.browserAction.setTitle({ title: "NextClick: OPEN" });
+      clearTimeout(_timer);
+    }
+  }, 200);
+};
+(function(_WIN, _DOC) {
+  let _init = function() {
+    console.log(">>onload: background");
+    _func_toggle(false);
+  };
+  _WIN.onload = _init;
+})(window, document);
