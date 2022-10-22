@@ -22,5 +22,5 @@
     "default_popup": "index.html",
     "default_icon": "images/icon-48x48-off.png"
   },
-  "manifest_version": 3
+  "manifest_version": 2
 }
