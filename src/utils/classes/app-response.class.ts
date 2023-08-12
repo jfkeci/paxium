@@ -15,7 +15,6 @@ export class AppResponse<T> implements IAppResponse {
 
     if (params.message) this.message = params.message;
     if (params.data) this.data = params.data;
-    if (params.meta) this.meta = params.meta;
     if (params.stack) this.stack = params.stack;
 
     return this;
