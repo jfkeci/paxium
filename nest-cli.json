@@ -1,8 +1,59 @@
 {
   "$schema": "https://json.schemastore.org/nest-cli",
   "collection": "@nestjs/schematics",
-  "sourceRoot": "src",
+  "sourceRoot": "apps/paxium/src",
   "compilerOptions": {
-    "deleteOutDir": true
+    "deleteOutDir": true,
+    "webpack": true,
+    "tsConfigPath": "apps/paxium/tsconfig.app.json"
+  },
+  "monorepo": true,
+  "root": "apps/paxium",
+  "projects": {
+    "paxium": {
+      "type": "application",
+      "root": "apps/paxium",
+      "entryFile": "main",
+      "sourceRoot": "apps/paxium/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/paxium/tsconfig.app.json"
+      }
+    },
+    "paxium-lambda": {
+      "type": "application",
+      "root": "apps/paxium-lambda",
+      "entryFile": "main",
+      "sourceRoot": "apps/paxium-lambda/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/paxium-lambda/tsconfig.app.json"
+      }
+    },
+    "paxium-api": {
+      "type": "application",
+      "root": "apps/paxium-api",
+      "entryFile": "main",
+      "sourceRoot": "apps/paxium-api/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/paxium-api/tsconfig.app.json"
+      }
+    },
+    "paxium-database": {
+      "type": "library",
+      "root": "libs/paxium-database",
+      "entryFile": "index",
+      "sourceRoot": "libs/paxium-database/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/paxium-database/tsconfig.lib.json"
+      }
+    },
+    "paxium-utils": {
+      "type": "library",
+      "root": "libs/paxium-utils",
+      "entryFile": "index",
+      "sourceRoot": "libs/paxium-utils/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/paxium-utils/tsconfig.lib.json"
+      }
+    }
   }
 }
