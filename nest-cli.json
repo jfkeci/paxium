@@ -54,6 +54,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/paxium-utils/tsconfig.lib.json"
       }
+    },
+    "paxium-prisma-orm": {
+      "type": "library",
+      "root": "libs/paxium-prisma-orm",
+      "entryFile": "index",
+      "sourceRoot": "libs/paxium-prisma-orm/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/paxium-prisma-orm/tsconfig.lib.json"
+      }
     }
   }
 }

@@ -35,6 +35,12 @@
       ],
       "@app/paxium-utils/*": [
         "libs/paxium-utils/src/*"
+      ],
+      "@app/paxium-prisma-orm": [
+        "libs/paxium-prisma-orm/src"
+      ],
+      "@app/paxium-prisma-orm/*": [
+        "libs/paxium-prisma-orm/src/*"
       ]
     }
   }
