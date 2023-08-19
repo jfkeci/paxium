@@ -1,0 +1,173 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgres"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @unique(map: "userId_UNIQUE") @default(uuid()) @db.Uuid
+  authState String?   @db.VarChar(125)
+  firstName String?   @db.VarChar(125)
+  lastName  String?   @db.VarChar(125)
+  username  String?   @db.VarChar(125)
+  email     String    @db.VarChar(125)
+  password  String?   @db.VarChar(255)
+  createdAt DateTime? @default(now()) @db.Timestamptz(0)
+  updatedAt DateTime  @updatedAt
+
+  comments        Comment[]
+  notifications   Notification[]
+  note            Note[]
+  createdTasks    Task[]
+  assignedByTasks TaskAssignee[]  @relation("TashAssignee_assignedByTasks")
+  assignedTasks   TaskAssignee[]  @relation("TaskAssignee_assignedTasks")
+  workspace       Workspace[]
+  workspaceUsers  WorkspaceUser[]
+}
+
+model Task {
+  id          String    @id @unique(map: "taskId_UNIQUE") @default(uuid()) @db.Uuid
+  title       String    @db.VarChar(150)
+  body        String?   @db.VarChar(500)
+  due         DateTime? @db.Timestamptz(0)
+  meta        Json?
+  createdById String    @db.Uuid
+  workspaceId String?   @db.Uuid
+  parentId    String?   @db.Uuid
+  createdAt   DateTime  @default(now()) @db.Timestamptz(0)
+  updatedAt   DateTime  @updatedAt
+
+  createdBy User       @relation(fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Task_createdBy_key")
+  workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "Task_workspace_key")
+  parent    Task?      @relation("Task_parent_relation", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Task_parent_key")
+
+  children  Task[]         @relation("Task_parent_relation")
+  assignees TaskAssignee[]
+  comments  Comment[]
+  notes     Note[]
+
+  @@index([createdById], map: "Task_createdBy_idx")
+  @@index([parentId], map: "Task_parent_idx")
+}
+
+model Comment {
+  id        String   @id @unique(map: "Comment_Id_UNIQUE") @default(uuid()) @db.Uuid
+  text      String   @db.VarChar(125)
+  ownerId   String   @db.Uuid
+  noteId    String?  @db.Uuid
+  taskId    String?  @db.Uuid
+  parentId  String?  @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz(0)
+  updatedAt DateTime @updatedAt
+
+  parent Comment? @relation("Comment_parent_relation", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Comment_parent_key")
+  note   Note?    @relation(fields: [noteId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Comment_note_key")
+  task   Task?    @relation(fields: [taskId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Comment_task_key")
+  owner  User     @relation(fields: [ownerId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Comment_owner_key")
+
+  children Comment[] @relation("Comment_parent_relation")
+
+  @@index([parentId], map: "Comment_parent_idx")
+  @@index([noteId], map: "Comment_note_idx")
+  @@index([taskId], map: "Comment_task_idx")
+  @@index([ownerId], map: "Comment_owner_idx")
+}
+
+model Notification {
+  id          String   @id @unique(map: "notificationId_UNIQUE") @default(uuid()) @db.Uuid
+  title       String   @db.VarChar(125)
+  description String?  @db.VarChar(255)
+  type        String   @db.VarChar(125)
+  image       String?  @db.VarChar(255)
+  url         String?  @db.VarChar(255)
+  userId      String   @db.Uuid
+  isSeen      Boolean  @db.Boolean
+  isDismissed Boolean  @db.Boolean
+  createdAt   DateTime @default(now()) @db.Timestamptz(0)
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Notification_user_key")
+
+  @@index([userId], map: "Notification_user_idx")
+}
+
+model Note {
+  id          String   @id @unique(map: "Note_id_UNIQUE") @default(uuid()) @db.Uuid
+  title       String?  @db.VarChar(255)
+  description String?  @db.VarChar(1020)
+  tags        Json?
+  createdById String   @db.Uuid
+  workspaceId String   @db.Uuid
+  taskId      String?  @db.Uuid
+  parentId    String?  @db.Uuid
+  createdAt   DateTime @default(now()) @db.Timestamptz(0)
+  updatedAt   DateTime @updatedAt
+
+  createdBy User       @relation(fields: [createdById], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Note_createdBy_Key")
+  parent    Note?      @relation("Note_parent_relation", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Note_parentId_key")
+  task      Task?      @relation(fields: [taskId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Note_taskId_key")
+  workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Note_workspaceId_key")
+
+  children Note[]    @relation("Note_parent_relation")
+  comments Comment[]
+
+  @@index([createdById], map: "noteCreatedById_idx")
+  @@index([parentId], map: "noteParentId_idx")
+  @@index([taskId], map: "noteTaskId_idx")
+}
+
+model TaskAssignee {
+  id           String   @id @unique(map: "TaskAssignee_Id_UNIQUE") @default(uuid()) @db.Uuid
+  taskId       String   @db.Uuid
+  assigneeId   String   @db.Uuid
+  assignedById String   @db.Uuid
+  createdAt    DateTime @default(now()) @db.Timestamptz(0)
+
+  task       Task? @relation(fields: [taskId], references: [id], map: "TaskAssignee_TaskId_fkey")
+  assignedBy User  @relation("TashAssignee_assignedByTasks", fields: [assignedById], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "TaskAssignee_AssignedById_fkey")
+  assignee   User  @relation("TaskAssignee_assignedTasks", fields: [assigneeId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "TaskAssignee_AssigneeId_fkey")
+
+  @@index([taskId], map: "TaskAssignee_TaskId_idx")
+  @@index([assignedById], map: "TaskAssignee_AssignedById_idx")
+  @@index([assigneeId], map: "TaskAssignee_AssigneeId_idx")
+}
+
+enum WorkspaceType {
+  Primary
+  Secondary
+}
+
+model Workspace {
+  id          String        @id @unique(map: "Workspace_Id_UNIQUE") @default(uuid()) @db.Uuid
+  type        WorkspaceType
+  ownerId     String        @db.Uuid
+  title       String?       @db.VarChar(150)
+  description String?       @db.VarChar(500)
+  createdAt   DateTime?     @default(now()) @db.Timestamptz(0)
+  updatedAt   DateTime      @updatedAt
+
+  workspaceUsers WorkspaceUser[]
+  tasks          Task[]
+  notes          Note[]
+
+  owner User @relation(fields: [ownerId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Workspace_ownerId_key")
+
+  @@index([ownerId], map: "Workspace_ownerId_idx")
+}
+
+model WorkspaceUser {
+  id          String    @id @unique(map: "WorkspaceUser_Id_UNIQUE") @db.VarChar(64)
+  userId      String    @db.Uuid
+  workspaceId String    @db.Uuid
+  createdBy   DateTime? @default(now()) @db.Timestamptz(0)
+  updatedBy   DateTime? @default(now()) @db.Timestamptz(0)
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "WorkspaceUser_userId_key")
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "WorkspaceUser_workspaceId_key")
+
+  @@index([userId], map: "WorkspaceUser_userId_idx")
+  @@index([workspaceId], map: "WorkspaceUser_workspaceId_idx")
+}
